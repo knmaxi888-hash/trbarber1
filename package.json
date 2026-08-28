@@ -1,0 +1,25 @@
+{
+  "name": "tr-barber",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knmaxi888-hash/tr-barber.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/knmaxi888-hash/tr-barber/issues"
+  },
+  "homepage": "https://github.com/knmaxi888-hash/tr-barber#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongodb": "^7.6.0",
+    "qrcode": "^1.5.4"
+  }
+}

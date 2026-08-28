@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TR BARBER - Conectar WhatsApp</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            text-align: center;
+            padding: 30px;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 10px; }
+        .subtitle { color: #888; margin-bottom: 30px; }
+        #qr-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            display: inline-block;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #qr-container img { max-width: 300px; }
+        #status {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            padding: 12px 24px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .waiting { background: #1a1a2e; color: #e0e0e0; }
+        .connected { background: #0d3320; color: #4ade80; }
+        .error { background: #3d1414; color: #f87171; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #333;
+            border-top: 4px solid #4ade80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .instructions {
+            margin-top: 25px;
+            color: #666;
+            font-size: 0.9rem;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fade Away Barbershop</h1>
+        <p class="subtitle">Conectar WhatsApp del negocio</p>
+
+        <div id="qr-container">
+            <div class="spinner" id="spinner"></div>
+        </div>
+
+        <div id="status" class="waiting">Esperando QR...</div>
+
+        <div class="instructions">
+            <strong>Cómo conectar:</strong><br>
+            1. Abrí WhatsApp en tu celular<br>
+            2. Andá a <strong>Dispositivos vinculados</strong><br>
+            3. Tocá <strong>Vincular dispositivo</strong><br>
+            4. Escaneá el código QR que aparece arriba
+        </div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            try {
+                const res = await fetch("/api/wa-status");
+                const data = await res.json();
+
+                if (data.connected) {
+                    document.getElementById("status").className = "connected";
+                    document.getElementById("status").textContent = "✅ Conectado a WhatsApp";
+                    document.getElementById("qr-container").innerHTML = "✅";
+                    document.getElementById("spinner").style.display = "none";
+                    return;
+                }
+
+                if (data.hasQR) {
+                    const qrRes = await fetch("/api/wa-qr");
+                    const qrData = await qrRes.json();
+                    if (qrData.qr) {
+                        document.getElementById("qr-container").innerHTML =
+                            `<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData.qr)}" alt="QR Code">`;
+                        document.getElementById("status").className = "waiting";
+                        document.getElementById("status").textContent = "Escaneá el QR con tu celular";
+                        document.getElementById("spinner").style.display = "none";
+                    }
+                }
+            } catch (e) {
+                console.log("Esperando servidor...");
+            }
+        }
+
+        setInterval(checkStatus, 2000);
+        checkStatus();
+    </script>
+</body>
+</html>
