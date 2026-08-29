@@ -8,7 +8,7 @@ const MONGODB_URI = process.env.MONGODB_URI || "";
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || "";
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 
-const HORARIOS = ["09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00"];
+const HORARIOS = ["09:00","10:00","11:00","12:00","17:00","18:00","19:00","20:00","21:00","22:00"];
 
 let db = null;
 let reservations = null;
