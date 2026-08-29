@@ -860,7 +860,7 @@
 
     <script>
         const WHATSAPP_NUMBER = "5493718322732";
-        const API_URL = location.hostname === "localhost" ? "http://localhost:3001" : "https://tr-barber.onrender.com";
+        const API_URL = window.location.origin;
 
         let currentDate = new Date();
         let selectedDate = null;
@@ -1309,7 +1309,7 @@
 
     <script>
     (function() {
-        var API = location.hostname === "localhost" ? "http://localhost:3001" : "https://tr-barber.onrender.com";
+        var API = window.location.origin;
         var fab = document.getElementById("chatFab");
         var win = document.getElementById("chatWindow");
         var msgs = document.getElementById("chatMessages");

@@ -860,7 +860,7 @@
     </div>
 
     <script>
-        const API_URL = location.hostname === "localhost" ? "http://localhost:3001" : "https://tr-barber.onrender.com";
+        const API_URL = window.location.origin;
         let config = JSON.parse(localStorage.getItem("trbarber_config") || '{"cutPrice": 5000, "barberLeave": 1000}');
         let currentFilter = "all";
 
