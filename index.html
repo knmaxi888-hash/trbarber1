@@ -942,15 +942,15 @@
             const year = selectedDate.getFullYear();
             const dateStr = `${year}-${month}-${day}`;
 
-            fetch(API_URL + "/api/reserved-times/" + encodeURIComponent(dateStr))
+            fetch(API_URL + "/api/available-times/" + encodeURIComponent(dateStr))
                 .then(function(r) { return r.json(); })
-                .then(function(reservedTimes) {
+                .then(function(availableTimes) {
                     document.querySelectorAll(".time-btn").forEach(function(btn) {
-                        if (reservedTimes.includes(btn.dataset.time)) {
+                        if (!availableTimes.includes(btn.dataset.time)) {
                             btn.disabled = true;
                             btn.style.opacity = "0.3";
                             btn.style.cursor = "not-allowed";
-                            btn.title = "Horario ya reservado";
+                            btn.title = btn.dataset.time + " no disponible";
                         }
                     });
                 })
