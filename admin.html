@@ -856,6 +856,13 @@
             </div>
             <button class="save-btn" id="saveConfig">Guardar Configuracion</button>
         </div>
+
+        <div class="config-section">
+            <div class="section-title">Horarios de trabajo</div>
+            <p style="color:#888;font-size:12px;margin-bottom:12px;">Seleccioná los horarios en que querés recibir reservas. Si desactivás uno, no aparecerá en la web ni en el agente.</p>
+            <div class="hours-grid" id="hoursGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+            <button class="save-btn" id="saveHours">Guardar horarios</button>
+        </div>
     </div>
     </div>
 
@@ -875,6 +882,48 @@
             loadStats();
             alert("Configuracion guardada");
         }
+
+        async function loadHoursConfig() {
+            try {
+                const res = await fetch(API_URL + "/api/config");
+                const data = await res.json();
+                const hours = data.hours || [];
+                const all = data.allHours || ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00"];
+                const grid = document.getElementById("hoursGrid");
+                grid.innerHTML = "";
+                all.forEach(function(h) {
+                    const checked = hours.includes(h) ? "checked" : "";
+                    grid.innerHTML += `<label style="display:flex;align-items:center;gap:6px;background:#111;border:1px solid #333;border-radius:20px;padding:8px 14px;font-size:13px;color:#fff;cursor:pointer;"><input type="checkbox" value="${h}" ${checked} style="accent-color:#fff;"> ${h}</label>`;
+                });
+            } catch(e) {
+                console.error("loadHours error", e);
+            }
+        }
+
+        async function saveHoursConfig() {
+            const checked = Array.from(document.querySelectorAll("#hoursGrid input:checked")).map(i => i.value);
+            if (checked.length === 0) { alert("Seleccioná al menos un horario"); return; }
+            try {
+                const res = await fetch(API_URL + "/api/config", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ hours: checked })
+                });
+                const data = await res.json();
+                if (data.success) alert("Horarios guardados");
+                else alert("Error al guardar");
+            } catch(e) { alert("Error de conexión"); }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadHoursConfig();
+            const btn = document.getElementById("saveHours");
+            if (btn) btn.addEventListener("click", saveHoursConfig);
+            const sc = document.getElementById("saveConfig");
+            if (sc) sc.addEventListener("click", saveConfig);
+        });
+
+        try { document.getElementById("saveConfig").addEventListener("click", saveConfig); } catch(e) {}
 
         function getReservations() {
             return fetch(API_URL + "/api/reservations").then(function(r) { return r.json(); }).catch(function() {

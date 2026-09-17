@@ -8,10 +8,19 @@ const MONGODB_URI = process.env.MONGODB_URI || "";
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || "";
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 
+const ALL_HORARIOS = ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00"];
 const HORARIOS = ["08:00","09:00","10:00","11:00","12:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00"];
 
 let db = null;
 let reservations = null;
+let configCol = null;
+
+async function getWorkingHours() {
+    if (!configCol) return HORARIOS;
+    const doc = await configCol.findOne({ _id: "workingHours" });
+    if (doc && Array.isArray(doc.hours) && doc.hours.length > 0) return doc.hours;
+    return HORARIOS;
+}
 
 app.use(express.json());
 
@@ -35,6 +44,7 @@ async function connectDB() {
         await client.connect();
         db = client.db("trbarber");
         reservations = db.collection("reservations");
+        configCol = db.collection("config");
         await reservations.createIndex({ date: 1 });
         console.log("[DB] Conectado a MongoDB");
     } catch (e) {
@@ -221,16 +231,30 @@ app.delete("/api/reservations/:id", async (req, res) => {
     }
 });
 
+app.get("/api/config", async (req, res) => {
+    const hours = await getWorkingHours();
+    res.json({ hours, allHours: ALL_HORARIOS });
+});
+
+app.put("/api/config", async (req, res) => {
+    if (!configCol) return res.status(500).json({ error: "DB not connected" });
+    const hours = req.body.hours;
+    if (!Array.isArray(hours)) return res.status(400).json({ error: "hours must be array" });
+    await configCol.updateOne({ _id: "workingHours" }, { $set: { hours } }, { upsert: true });
+    res.json({ success: true, hours });
+});
+
 app.get("/api/available-times/:date", async (req, res) => {
     const date = req.params.date;
+    const workingHours = await getWorkingHours();
     if (reservations) {
         const reserved = await reservations
             .find({ date: date, status: { $ne: "cancelada" } })
             .toArray();
         const reservedTimes = reserved.map(r => r.time);
-        res.json(HORARIOS.filter(h => !reservedTimes.includes(h)));
+        res.json(workingHours.filter(h => !reservedTimes.includes(h)));
     } else {
-        res.json(HORARIOS);
+        res.json(workingHours);
     }
 });
 
